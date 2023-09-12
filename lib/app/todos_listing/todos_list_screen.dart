@@ -27,7 +27,7 @@ class TodoListScreen extends ConsumerWidget {
       ),
       floatingActionButton: state is ScreenStateData
           ? FloatingActionButton(
-        tooltip: 'Add ToDo',
+              tooltip: 'Add ToDo',
               onPressed: () => AddTodoBottomSheet.show(context),
               child: const Icon(Icons.add),
             )
@@ -136,7 +136,6 @@ class _TodoListItem extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      // padding: const EdgeInsets.all(8),
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
         // color: AppColors.colors.danger30,
@@ -144,12 +143,63 @@ class _TodoListItem extends StatelessWidget {
         border: Border.all(color: colorScheme.primaryContainer, width: 1),
       ),
       child: ListTile(
-        title: Text(todo.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+        title: Text(todo.title, maxLines: 2, overflow: TextOverflow.ellipsis),
         leading: Icon(
           todo.isCompleted ? Icons.check_rounded : Icons.hourglass_empty_rounded,
           color: todo.isCompleted ? Colors.green : colorScheme.primary,
         ),
+        onTap: () => _TodoBottomDetailsSheet.show(context, todo: todo),
       ),
+    );
+  }
+}
+
+class _TodoBottomDetailsSheet extends ConsumerWidget {
+  const _TodoBottomDetailsSheet._(
+    this.todo,
+    this.scrollController,
+  );
+
+  final ToDo todo;
+  final ScrollController scrollController;
+
+  static show(BuildContext context, {required ToDo todo}) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.4,
+        minChildSize: 0.4,
+        maxChildSize: 0.8,
+        builder: (context, scrollController) => _TodoBottomDetailsSheet._(todo, scrollController),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(width: 16),
+        Padding(
+          padding: const EdgeInsets.only(top: 32.0),
+          child: Icon(
+            todo.isCompleted ? Icons.check_rounded : Icons.hourglass_empty_rounded,
+            color: todo.isCompleted ? Colors.green : colorScheme.primary,
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            controller: scrollController,
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 32.0, horizontal: 16),
+            child: Text(todo.title, style: textTheme.titleMedium),
+          ),
+        ),
+      ],
     );
   }
 }
