@@ -12,6 +12,7 @@ class TodoListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(todoListViewModelProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -27,6 +28,9 @@ class TodoListScreen extends ConsumerWidget {
       ),
       floatingActionButton: state is ScreenStateData
           ? FloatingActionButton(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              splashColor: colorScheme.onPrimaryContainer,
               tooltip: 'Add ToDo',
               onPressed: () => AddTodoBottomSheet.show(context),
               child: const Icon(Icons.add),
@@ -110,17 +114,31 @@ class _NoDataWidget extends StatelessWidget {
   }
 }
 
-class _DataWidget extends StatelessWidget {
+class _DataWidget extends ConsumerStatefulWidget {
   const _DataWidget(this.todos);
 
   final List<ToDo> todos;
 
   @override
+  ConsumerState<_DataWidget> createState() => _DataWidgetState();
+}
+
+class _DataWidgetState extends ConsumerState<_DataWidget> {
+  final _listKey = GlobalKey<AnimatedListState>();
+  final _scrollController = ScrollController();
+
+  @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: todos.length,
-      itemBuilder: (context, index) {
-        return _TodoListItem(todo: todos[index]);
+    ref.listen(onItemInsertedProvider, (previous, next) {
+      _scrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.ease);
+      _listKey.currentState?.insertItem(0, duration: const Duration(milliseconds: 500));
+    });
+    return AnimatedList(
+      key: _listKey,
+      controller: _scrollController,
+      initialItemCount: widget.todos.length,
+      itemBuilder: (context, index, animation) {
+        return _TodoListItem(todo: widget.todos[index], animation: animation);
       },
     );
   }
@@ -128,27 +146,48 @@ class _DataWidget extends StatelessWidget {
 
 class _TodoListItem extends StatelessWidget {
   final ToDo todo;
+  final Animation<double> animation;
 
-  const _TodoListItem({required this.todo});
+  const _TodoListItem({
+    required this.todo,
+    required this.animation,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      decoration: BoxDecoration(
-        // color: AppColors.colors.danger30,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.primaryContainer, width: 1),
-      ),
-      child: ListTile(
-        title: Text(todo.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-        leading: Icon(
-          todo.isCompleted ? Icons.check_rounded : Icons.hourglass_empty_rounded,
-          color: todo.isCompleted ? Colors.green : colorScheme.primary,
+    final displayAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: animation, curve: const Interval(0.0, 0.6, curve: Cubic(.42, 0, .58, 1))),
+    );
+
+    final scaleAnimation = Tween<double>(begin: 0.9, end: 1).animate(
+      CurvedAnimation(parent: animation, curve: const Interval(0.3, 1, curve: Cubic(.42, 0, .58, 2.2))),
+    );
+
+    return FadeTransition(
+      opacity: displayAnimation,
+      child: SizeTransition(
+        sizeFactor: displayAnimation,
+        child: ScaleTransition(
+          alignment: Alignment.center,
+          scale: scaleAnimation,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ListTile(
+              title: Text(todo.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+              leading: Icon(
+                todo.isCompleted ? Icons.check_rounded : Icons.hourglass_empty_rounded,
+                color: todo.isCompleted ? Colors.green : colorScheme.primary,
+              ),
+              onTap: () => _TodoBottomDetailsSheet.show(context, todo: todo),
+            ),
+          ),
         ),
-        onTap: () => _TodoBottomDetailsSheet.show(context, todo: todo),
       ),
     );
   }

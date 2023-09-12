@@ -14,6 +14,8 @@ final todoListViewModelProvider = StateNotifierProvider.autoDispose<TodoListView
   ),
 );
 
+final onItemInsertedProvider = StateProvider.autoDispose<ToDo?>((ref) => null);
+
 class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
   TodoListViewModel(
     this._ref,
@@ -68,6 +70,11 @@ class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
       _ => [todo],
     };
 
-    state = ScreenStateData(newList);
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted) {
+        state = ScreenStateData(newList);
+        _ref.read(onItemInsertedProvider.notifier).state = todo;
+      }
+    });
   }
 }
