@@ -3,22 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo/app/models/screen_state.dart';
 import 'package:todo/app/models/todo.dart';
 import 'package:todo/app/providers.dart';
+import 'package:todo/app/todo_adding/add_todo_view_model.dart';
 import 'package:todo/data/models/todo_model.dart';
 import 'package:todo/data/todos_repository.dart';
 
 final todoListViewModelProvider = StateNotifierProvider.autoDispose<TodoListViewModel, ScreenState<List<ToDo>>>(
   (ref) => TodoListViewModel(
+    ref,
     ref.watch(todosRepositoryProvider),
   ),
 );
 
 class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
   TodoListViewModel(
+    this._ref,
     this._repository,
   ) : super(const ScreenStateLoading()) {
     _fetchTodos();
+    _ref.listen<ToDo?>(onToDoAddedProvider, (previous, todo) {
+      if (todo != null) {
+        _addTodo(todo);
+      }
+    });
   }
 
+  final AutoDisposeStateNotifierProviderRef _ref;
   final TodosRepository _repository;
 
   Future<void> _fetchTodos() async {

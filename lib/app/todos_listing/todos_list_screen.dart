@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo/app/models/screen_state.dart';
 import 'package:todo/app/models/todo.dart';
+import 'package:todo/app/todo_adding/add_todo_bottom_sheet.dart';
 
 import 'todos_list_view_model.dart';
 
@@ -26,10 +27,8 @@ class TodoListScreen extends ConsumerWidget {
       ),
       floatingActionButton: state is ScreenStateData
           ? FloatingActionButton(
-              tooltip: 'Add ToDo',
-              onPressed: () {
-                //todo: open bottom sheet
-              },
+        tooltip: 'Add ToDo',
+              onPressed: () => AddTodoBottomSheet.show(context),
               child: const Icon(Icons.add),
             )
           : null,
@@ -102,9 +101,7 @@ class _NoDataWidget extends StatelessWidget {
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
             ),
-            onPressed: () {
-              //todo: open bottom sheet
-            },
+            onPressed: () => AddTodoBottomSheet.show(context),
             child: const Text('Add ToDo'),
           ),
         ],
