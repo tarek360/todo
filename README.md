@@ -1,7 +1,12 @@
-# To-Do List App ReadMe
+# To-Do List App
 
 This ReadMe file provides an overview of the To-Do List app, including its architecture, state management, UI/UX design
 choices, testing approach, and potential improvements.
+
+| ToDos List | Add New | Show details |
+| ------ | ------ | ------ |
+|<img src="https://github.com/tarek360/todo/assets/8615768/8e2ea367-33a5-4f92-99b9-cacd5e925daf" width=240>|<img src="https://github.com/tarek360/todo/assets/8615768/a7bee073-e7a1-49db-b51e-ba04f2466948" width=240>|<img src="https://github.com/tarek360/todo/assets/8615768/6c1f0d55-d723-42b9-bab4-d0ee7e2c2fcf" width=240>|
+
 
 ## App Architecture
 
