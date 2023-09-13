@@ -52,6 +52,8 @@ class AddTodoBottomSheet extends ConsumerWidget {
           const SizedBox(height: 16.0),
           TextField(
             autofocus: true,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _getOnPressed(context, ref)?.call(),
             decoration: InputDecoration(
               hintText: 'Example: Drink more water.',
               hintStyle: textTheme.titleMedium?.copyWith(color: Colors.grey.shade500),
