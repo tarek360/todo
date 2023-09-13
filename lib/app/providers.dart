@@ -8,5 +8,5 @@ final dioProvider = Provider<Dio>((ref) {
 });
 
 final todosRepositoryProvider = Provider<TodosRepository>((ref) {
-  return TodosRepository(ref.watch(dioProvider));
+  return TodosRepositoryImpl(ref.watch(dioProvider));
 });
