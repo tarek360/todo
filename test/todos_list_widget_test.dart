@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:todo/app/providers.dart';
+import 'package:todo/data/models/todo_model.dart';
 import 'package:todo/main.dart';
 
-import 'mocks.dart';
+import 'mocks/mocks.dart';
 
 void main() {
   group('TodoListScreen Tests', () {
+    final mockRepository = MockTodosRepository();
+
+    final mockTodoEntities = [
+      TodoEntity('a', false),
+      TodoEntity('b', false),
+      TodoEntity('c', true),
+    ];
+
     testWidgets('ScreenStateData Test', (WidgetTester tester) async {
+      when(mockRepository.fetchTodos()).thenAnswer((_) async => mockTodoEntities);
+
       await tester.pumpWidget(ProviderScope(
-        overrides: [todosRepositoryProvider.overrideWithValue(FakeDataTodosRepository())],
+        overrides: [todosRepositoryProvider.overrideWithValue(mockRepository)],
         child: const ToDoApp(),
       ));
 
@@ -20,7 +32,6 @@ void main() {
       await tester.pump();
 
       // Then, expect the data state
-
       expect(find.byType(CircularProgressIndicator), findsNothing);
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
@@ -35,8 +46,10 @@ void main() {
     });
 
     testWidgets('ScreenStateNoData Test', (WidgetTester tester) async {
+      when(mockRepository.fetchTodos()).thenAnswer((_) async => []);
+
       await tester.pumpWidget(ProviderScope(
-        overrides: [todosRepositoryProvider.overrideWithValue(FakeDataTodosRepository.empty())],
+        overrides: [todosRepositoryProvider.overrideWithValue(mockRepository)],
         child: const ToDoApp(),
       ));
 
@@ -53,8 +66,10 @@ void main() {
     });
 
     testWidgets('ScreenStateError Test', (WidgetTester tester) async {
+      when(mockRepository.fetchTodos()).thenAnswer((_) async => Future.error('test error'));
+
       await tester.pumpWidget(ProviderScope(
-        overrides: [todosRepositoryProvider.overrideWithValue(const FakeErrorTodosRepository())],
+        overrides: [todosRepositoryProvider.overrideWithValue(mockRepository)],
         child: const ToDoApp(),
       ));
 

@@ -9,7 +9,7 @@ import 'package:todo/data/todos_repository.dart';
 
 final todoListViewModelProvider = StateNotifierProvider.autoDispose<TodoListViewModel, ScreenState<List<ToDo>>>(
   (ref) => TodoListViewModel(
-    ref,
+    ref.container,
     ref.watch(todosRepositoryProvider),
   ),
 );
@@ -17,11 +17,8 @@ final todoListViewModelProvider = StateNotifierProvider.autoDispose<TodoListView
 final onItemInsertedProvider = StateProvider.autoDispose<ToDo?>((ref) => null);
 
 class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
-  TodoListViewModel(
-    this._ref,
-    this._repository,
-  ) : super(const ScreenStateLoading()) {
-    _fetchTodos();
+  TodoListViewModel(this._ref,
+      this._repository,) : super(const ScreenStateLoading()) {
     _ref.listen<ToDo?>(onToDoAddedProvider, (previous, todo) {
       if (todo != null) {
         _addTodo(todo);
@@ -29,10 +26,10 @@ class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
     });
   }
 
-  final AutoDisposeStateNotifierProviderRef _ref;
+  final ProviderContainer _ref;
   final TodosRepository _repository;
 
-  Future<void> _fetchTodos() async {
+  Future<void> loadData() async {
     try {
       final todos = _transformModel(await _repository.fetchTodos());
       state = todos.isEmpty ? const ScreenStateNoData() : ScreenStateData(todos);
@@ -61,7 +58,7 @@ class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
 
   Future<void> tryAgain() async {
     state = const ScreenStateLoading();
-    _fetchTodos();
+    loadData();
   }
 
   void _addTodo(ToDo todo) {
@@ -70,6 +67,7 @@ class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
       _ => [todo],
     };
 
+    // A delay to wait the bottom sheet closing.
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) {
         state = ScreenStateData(newList);

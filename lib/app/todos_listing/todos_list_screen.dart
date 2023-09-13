@@ -6,11 +6,22 @@ import 'package:todo/app/todo_adding/add_todo_bottom_sheet.dart';
 
 import 'todos_list_view_model.dart';
 
-class TodoListScreen extends ConsumerWidget {
+class TodoListScreen extends ConsumerStatefulWidget {
   const TodoListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TodoListScreen> createState() => _TodoListScreenState();
+}
+
+class _TodoListScreenState extends ConsumerState<TodoListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(todoListViewModelProvider.notifier).loadData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(todoListViewModelProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
