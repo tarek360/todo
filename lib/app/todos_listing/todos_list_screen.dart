@@ -205,11 +205,12 @@ class _TodoBottomDetailsSheet extends ConsumerWidget {
   static show(BuildContext context, {required ToDo todo}) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) => DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.4,
         minChildSize: 0.4,
-        maxChildSize: 0.8,
+        maxChildSize: 0.9,
         builder: (context, scrollController) => _TodoBottomDetailsSheet._(todo, scrollController),
       ),
     );
