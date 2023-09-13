@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo/app/models/screen_state.dart';
 import 'package:todo/app/models/todo.dart';
@@ -17,8 +18,10 @@ final todoListViewModelProvider = StateNotifierProvider.autoDispose<TodoListView
 final onItemInsertedProvider = StateProvider.autoDispose<ToDo?>((ref) => null);
 
 class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
-  TodoListViewModel(this._ref,
-      this._repository,) : super(const ScreenStateLoading()) {
+  TodoListViewModel(
+    this._ref,
+    this._repository,
+  ) : super(const ScreenStateLoading()) {
     _ref.listen<ToDo?>(onToDoAddedProvider, (previous, todo) {
       if (todo != null) {
         _addTodo(todo);
@@ -62,16 +65,29 @@ class TodoListViewModel extends StateNotifier<ScreenState<List<ToDo>>> {
   }
 
   void _addTodo(ToDo todo) {
-    final List<ToDo> newList = switch (state) {
-      ScreenStateData(data: var data) => [todo, ...data],
-      _ => [todo],
-    };
+    void addItem() {
+      final List<ToDo> newList = switch (state) {
+        ScreenStateData(data: var data) => [todo, ...data],
+        _ => [todo],
+      };
+
+      state = ScreenStateData(newList);
+      _ref.read(onItemInsertedProvider.notifier).state = todo;
+    }
+
+    void doHapticFeedback() {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          HapticFeedback.lightImpact();
+        }
+      });
+    }
 
     // A delay to wait the bottom sheet closing.
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) {
-        state = ScreenStateData(newList);
-        _ref.read(onItemInsertedProvider.notifier).state = todo;
+        addItem();
+        doHapticFeedback();
       }
     });
   }
